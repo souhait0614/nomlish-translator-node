@@ -20,7 +20,9 @@ interface FullParameter extends Required<Parameter> {
   transbtn: string
   before: string
 }
+
 const nomlishUrl = "https://racing-lagoon.info/nomu/translate.php"
+const csrf = "CSRF check failed"
 
 export const getToken = async () => {
   const { data } = await client.get<string>(nomlishUrl)
@@ -40,11 +42,12 @@ export const getOutput = async (
     level,
     options,
     token,
-    transbtn: "翻訳",
+    transbtn: "",
   }
   const body = new URLSearchParams(Object.entries(fullParam)).toString()
 
   const { data } = await client.post<string>(nomlishUrl, body)
+  if (data.includes(csrf)) throw new Error("CSRF check failed")
   const [textarea] = data.match(/<textarea.*name="after1".*?>[\S\s]*?<\/textarea>/) ?? [""]
   const output = textarea.replace(/(^<.*?>|<\/.*?>$)/g, "")
 
@@ -74,7 +77,13 @@ export class Translator {
       ...param,
     }
 
-    return getOutput(input, token, fixedParam)
+    try {
+      return await getOutput(input, token, fixedParam)
+    } catch {
+      this.#token = getToken()
+      const refetchToken = await this.#token
+      return getOutput(input, refetchToken, fixedParam)
+    }
   }
 }
 
@@ -87,5 +96,10 @@ export const translate = async (input: string, param: Parameter = {}) => {
     ...param,
   }
 
-  return getOutput(input, token, fixedParam)
+  try {
+    return await getOutput(input, token, fixedParam)
+  } catch {
+    const refetchToken = await getToken()
+    return getOutput(input, refetchToken, fixedParam)
+  }
 }
