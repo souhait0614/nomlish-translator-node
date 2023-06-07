@@ -10,6 +10,14 @@
     "translate",
     "Japanese"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/souhait0614/nomlish-translator-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/souhait0614/nomlish-translator-node/issues"
+  },
+  "homepage": "https://github.com/souhait0614/nomlish-translator-node#readme",
   "license": "MIT",
   "version": "1.0.1",
   "type": "module",
