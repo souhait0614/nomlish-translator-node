@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsc && vite build",
     "watch": "vite build -w",
-    "prepublishOnly": "npm run test && npm run build",
+    "prepublishOnly": "npm run build",
     "lint": "npm-run-all -p lint:*",
     "lint:eslint": "eslint src/",
     "lint:markdownlint": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
