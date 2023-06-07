@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/souhait0614/nomlish-translator-node#readme",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "engines": {
     "node": ">=14.21.3"
