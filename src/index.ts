@@ -10,7 +10,7 @@ export interface Parameter {
   options?: "nochk" | "p0chk" | "p100chk"
 }
 
-const defaultParameter = {
+const initParameter = {
   level: 2,
   options: "nochk",
 } as const satisfies Required<Parameter>
@@ -26,19 +26,15 @@ export const getToken = async () => {
   const { data } = await client.get<string>(nomlishUrl)
   const [input] = data.match(/<input.*name="token".*?>/) ?? [""]
   const token = input.replace(/(^<.*value="|".*?\/?>$)/g, "")
-
   if (!token) throw new Error("Failed to get token")
   return token
 }
 
-export const translate = async (input: string, param: Parameter = {}) => {
-  if (!input) throw new Error("No input")
-  const token = await getToken()
-
-  const { level, options } = {
-    ...defaultParameter,
-    ...param,
-  }
+export const getOutput = async (
+  input: string,
+  token: string,
+  { level, options }: Required<Parameter>
+) => {
   const fullParam: FullParameter = {
     before: input,
     level,
@@ -54,4 +50,42 @@ export const translate = async (input: string, param: Parameter = {}) => {
 
   if (!output) throw new Error("Failed to get output")
   return output
+}
+
+export class Translator {
+  #token: Promise<string>
+
+  #defaultParameter: Required<Parameter>
+
+  constructor(defaultParameter: Parameter = {}) {
+    this.#token = getToken()
+    this.#defaultParameter = {
+      ...initParameter,
+      ...defaultParameter,
+    }
+  }
+
+  async translate(input: string, param: Parameter = {}) {
+    if (!input) throw new Error("No input")
+    const token = await this.#token
+
+    const fixedParam = {
+      ...this.#defaultParameter,
+      ...param,
+    }
+
+    return getOutput(input, token, fixedParam)
+  }
+}
+
+export const translate = async (input: string, param: Parameter = {}) => {
+  if (!input) throw new Error("No input")
+  const token = await getToken()
+
+  const fixedParam = {
+    ...initParameter,
+    ...param,
+  }
+
+  return getOutput(input, token, fixedParam)
 }
