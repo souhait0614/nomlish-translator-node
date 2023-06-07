@@ -1,6 +1,15 @@
 {
   "name": "nomlish-translator-node",
-  "description": "",
+  "description": "文字列をノムリッシュ翻訳します",
+  "author": {
+    "name": "すえ",
+    "url": "https://souhait.me"
+  },
+  "keywords": [
+    "nomlish",
+    "translate",
+    "Japanese"
+  ],
   "license": "MIT",
   "version": "1.0.0",
   "type": "module",
