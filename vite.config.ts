@@ -10,12 +10,11 @@ export default defineConfig({
       formats: ["cjs", "es"],
     },
     rollupOptions: {
-      external: ["axios", "axios-cookiejar-support", "tough-cookie"],
+      external: ["cross-fetch", "fetch-cookie"],
       output: {
         globals: {
-          axios: "axios",
-          "axios-cookiejar-support": "axios-cookiejar-support",
-          "tough-cookie": "tough-cookie",
+          "cross-fetch": "cross-fetch",
+          "fetch-cookie": "fetch-cookie",
         },
       },
     },

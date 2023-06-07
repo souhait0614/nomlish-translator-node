@@ -1,9 +1,7 @@
-import axios from "axios"
-import { wrapper } from "axios-cookiejar-support"
-import { CookieJar } from "tough-cookie"
+import baseFetch from "cross-fetch"
+import makeFetchCookie from "fetch-cookie"
 
-const jar = new CookieJar()
-const client = wrapper(axios.create({ jar }))
+const fetch = makeFetchCookie(baseFetch)
 
 export interface Parameter {
   level?: 1 | 2 | 3 | 4
@@ -21,12 +19,17 @@ interface FullParameter extends Required<Parameter> {
   before: string
 }
 
+const getText = (res: Response) => {
+  if (!res.ok) throw new Error(res.statusText)
+  return res.text()
+}
+
 const nomlishUrl = "https://racing-lagoon.info/nomu/translate.php"
 const csrf = "CSRF check failed"
 
 export const getToken = async () => {
-  const { data } = await client.get<string>(nomlishUrl)
-  const [input] = data.match(/<input.*name="token".*?>/) ?? [""]
+  const html = await fetch(nomlishUrl).then(getText)
+  const [input] = html.match(/<input.*name="token".*?>/) ?? [""]
   const token = input.replace(/(^<.*value="|".*?\/?>$)/g, "")
   if (!token) throw new Error("Failed to get token")
   return token
@@ -46,9 +49,15 @@ export const getOutput = async (
   }
   const body = new URLSearchParams(Object.entries(fullParam)).toString()
 
-  const { data } = await client.post<string>(nomlishUrl, body)
-  if (data.includes(csrf)) throw new Error("CSRF check failed")
-  const [textarea] = data.match(/<textarea.*name="after1".*?>[\S\s]*?<\/textarea>/) ?? [""]
+  const html = await fetch(nomlishUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  }).then(getText)
+  if (html.includes(csrf)) throw new Error("CSRF check failed")
+  const [textarea] = html.match(/<textarea.*name="after1".*?>[\S\s]*?<\/textarea>/) ?? [""]
   const output = textarea.replace(/(^<.*?>|<\/.*?>$)/g, "")
 
   if (!output) throw new Error("Failed to get output")
